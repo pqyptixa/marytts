@@ -500,13 +500,26 @@ public class Mary {
 
 		// first thing we do, let's test if the port is available:
 		int localPort = MaryProperties.needInteger("socket.port");
+		String localHost = MaryProperties.needProperty("socket.host");
 		if (!server.equals("commandline")) {
-			try {
-				ServerSocket serverSocket = new ServerSocket(localPort);
-				serverSocket.close();
-			} catch (IOException e) {
-				System.err.println("\nPort " + localPort + " already in use!");
-				throw e;
+			if(localHost.equals("")){
+				try {
+					ServerSocket serverSocket = new ServerSocket(localPort);
+					serverSocket.close();
+				} catch (IOException e) {
+					System.err.println("\nPort " + localPort + " already in use!");
+					throw e;
+				}
+			} else {
+				try {
+					InetAddress addr = InetAddress.getByName(localHost);
+					int backlog = 50;
+					ServerSocket serverSocket = new ServerSocket(localPort, backlog, addr);
+					serverSocket.close();
+				} catch (IOException e) {
+					System.err.println("\nCould not create socket at " + localHost + ", port " + localPort + "!");
+					throw e;
+				}
 			}
 		}
 
