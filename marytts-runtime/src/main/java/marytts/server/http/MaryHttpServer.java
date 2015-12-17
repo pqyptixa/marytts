@@ -163,6 +163,7 @@ public class MaryHttpServer extends Thread {
 		logger.info("Starting server.");
 
 		int localPort = MaryProperties.needInteger("socket.port");
+		String localHost = MaryProperties.needProperty("socket.host");
 
 		HttpParams params = new BasicHttpParams();
 		params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 0)
@@ -215,7 +216,11 @@ public class MaryHttpServer extends Thread {
 
 		try {
 			ListeningIOReactor ioReactor = new DefaultListeningIOReactor(numParallelThreads, params);
-			ioReactor.listen(new InetSocketAddress(localPort));
+			if(localHost.equals("")){
+				ioReactor.listen(new InetSocketAddress(localPort));
+			} else {
+				ioReactor.listen(new InetSocketAddress(localHost, localPort));
+			}
 			isReady = true;
 			ioReactor.execute(ioEventDispatch);
 		} catch (InterruptedIOException ex) {
